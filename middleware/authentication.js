@@ -3,6 +3,7 @@ const { isTokenValid } = require("../utils");
 
 const authenticateUser = async (req, res, next) => {
   const token = req.signedCookies.token;
+  console.log(token);
 
   if (!token) {
     throw new CustomError.UnauthenticatedError("Authentication Invalid");
@@ -10,12 +11,29 @@ const authenticateUser = async (req, res, next) => {
   try {
     const { name, userId, role } = isTokenValid({ token });
     req.user = { name, userId, role };
+    req.go = { name, userId, role };
     next();
   } catch (error) {
     throw new CustomError.UnauthenticatedError("Authentication Invalid");
   }
 };
 
+const authorizePermissions = (...roles) => {
+  return (req, res, next) => {
+    //   console.log("admin route");
+    // console.log(roles, req.user.role);
+    // const test = !roles.includes(req.user.role);
+    // console.log(test);
+    if (!roles.includes(req.user.role)) {
+      throw new CustomError.UnauthorizedError(
+        "Unauthorized to access this route"
+      );
+    }
+    next();
+  };
+};
+
 module.exports = {
   authenticateUser,
+  authorizePermissions,
 };
