@@ -28,19 +28,49 @@ const createReview = async (req, res) => {
 };
 
 const getAllReviews = async (req, res) => {
-  res.send("get all review");
+  const reviews = await Review.find({}).populate({
+    path: "product",
+    select: "name company price",
+  });
+  // .populate({ path: "user", select: "name" });
+  res.status(StatusCodes.OK).json({ reviews, count: reviews.length });
+
+  // res.send("get all review");
 };
 
 const getSingleReview = async (req, res) => {
-  res.send("get single review");
+  const { id: reviewId } = req.params;
+  const review = await Review.findOne({ _id: reviewId });
+  res.status(StatusCodes.OK).json({ review });
+  // res.send("get single review");
 };
 
 const updateReview = async (req, res) => {
-  res.send("update review");
+  const { id: reviewId } = req.params;
+  const { rating, title, comment } = req.body;
+  const review = await Review.findOne({ _id: reviewId });
+  checkPermissions(req.user, review.user);
+  review.rating = rating;
+  review.title = title;
+  review.comment = comment;
+  await review.save();
+  res.status(StatusCodes.OK).json({ review });
+  // res.send("update review");
 };
 
 const deleteReview = async (req, res) => {
-  res.send("delete review");
+  const { id: reviewId } = req.params;
+  const review = await Review.findOne({ _id: reviewId });
+  checkPermissions(req.user, review.user);
+  await review.remove();
+  res.status(StatusCodes.OK).json({ msg: "Success, review removed!" });
+  // res.send("delete review");
+};
+
+const getSingleProductReviews = async (req, res) => {
+  const { id: productId } = req.params;
+  const reviews = await Review.find({ product: productId });
+  res.status(StatusCodes.OK).json({ reviews, count: reviews.length });
 };
 
 module.exports = {
@@ -49,4 +79,5 @@ module.exports = {
   getSingleReview,
   updateReview,
   deleteReview,
+  getSingleProductReviews,
 };
