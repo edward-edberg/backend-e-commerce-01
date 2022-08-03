@@ -12,7 +12,7 @@ const fileUpload = require("express-fileupload");
 const rateLimiter = require("express-rate-limit");
 const helmet = require("helmet");
 const xss = require("xss-clean");
-const cors = require("cors");
+// const cors = require("cors");
 const mongoSanitize = require("express-mongo-sanitize");
 
 const cloudinary = require("cloudinary").v2;
@@ -48,25 +48,11 @@ app.use(helmet());
 app.use(cors());
 app.use(xss());
 app.use(mongoSanitize());
-app.use(morgan("tiny"));
+// app.use(morgan("tiny"));
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 app.use(express.static("./public"));
 app.use(fileUpload({ useTempFiles: true }));
-
-app.get("/", (req, res) => {
-  // console.log(req.cookies);
-  // throw new Error();
-  res.send("e-commerce api");
-});
-
-app.get("/api/v1", (req, res) => {
-  console.log(req.signedCookies);
-  // console.log(req.cookies);
-  res.status(StatusCodes.CREATED).json(req.signedCookies);
-
-  // res.send("e-commerce api");
-});
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
